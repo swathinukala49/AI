@@ -13,16 +13,19 @@ mlflow.set_tracking_uri("http://127.0.0.1:5000")
 mlflow.set_experiment("Salary Prediction")
 
 
+# Load dataset
 data = pd.read_csv("Salary_Data.csv")
 
 X = data[["YearsExperience"]]
 y = data["Salary"]
 
 
+# Parameters
 test_size = 0.2
 random_state = 42
 
 
+# Split data
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -31,23 +34,42 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 
+# Model
 model = LinearRegression()
 
 
+# MLflow run
 with mlflow.start_run(run_name="Linear Regression"):
 
+    # Train
     model.fit(X_train, y_train)
 
+    # Predict
     y_pred = model.predict(X_test)
+
+
+    # =========================
+    # METRICS
+    # =========================
 
     r2 = r2_score(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     rmse = mean_squared_error(y_test, y_pred) ** 0.5
 
+
+    # =========================
+    # LOG PARAMETERS
+    # =========================
+
     mlflow.log_params({
         "test_size": test_size,
         "random_state": random_state
     })
+
+
+    # =========================
+    # LOG METRICS
+    # =========================
 
     mlflow.log_metrics({
         "R2_Score": r2,
@@ -55,37 +77,80 @@ with mlflow.start_run(run_name="Linear Regression"):
         "RMSE": rmse
     })
 
+
+    # =========================
+    # LOG FIGURE
+    # =========================
+
     plt.figure(figsize=(8, 5))
-    plt.scatter(X_test, y_test, label="Actual")
-    plt.plot(X_test, y_pred, label="Predicted")
+
+    plt.scatter(
+        X_test,
+        y_test,
+        label="Actual"
+    )
+
+    plt.plot(
+        X_test,
+        y_pred,
+        label="Predicted"
+    )
+
     plt.xlabel("Years of Experience")
     plt.ylabel("Salary")
     plt.title("Linear Regression - Actual vs Predicted")
     plt.legend()
 
-    mlflow.log_figure(plt.gcf(), "linear_regression_plot.png")
+    mlflow.log_figure(
+        plt.gcf(),
+        "linear_regression_plot.png"
+    )
+
     plt.close()
+
+
+    # =========================
+    # LOG ARTIFACT
+    # =========================
 
     results = pd.DataFrame({
         "YearsExperience": X_test["YearsExperience"].values,
         "ActualSalary": y_test.values,
         "PredictedSalary": y_pred
     })
-    results.to_csv("linear_regression_predictions.csv", index=False)
-    mlflow.log_artifact("linear_regression_predictions.csv")
+
+    results.to_csv(
+        "linear_regression_predictions.csv",
+        index=False
+    )
+
+    mlflow.log_artifact(
+        "linear_regression_predictions.csv"
+    )
+
+
+    # =========================
+    # LOG MODEL
+    # =========================
 
     mlflow.sklearn.log_model(
         model,
         name="linear_regression_model"
     )
 
+
+    # =========================
+    # OUTPUT
+    # =========================
+
     print("===== LINEAR REGRESSION =====")
     print("R2 Score:", r2)
     print("Performance:", r2 * 100, "%")
     print("MAE:", mae)
     print("RMSE:", rmse)
-    print("\nParameters logged")
-    print("Metrics logged")
-    print("Figure logged")
-    print("Artifact logged")
-    print("Model logged")
+
+    print("\nParameters logged ✅")
+    print("Metrics logged ✅")
+    print("Figure logged ✅")
+    print("Artifact logged ✅")
+    print("Model logged ✅")

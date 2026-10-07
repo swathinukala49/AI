@@ -40,10 +40,12 @@ with mlflow.start_run(run_name="Random Forest"):
 
     y_pred = model.predict(X_test)
 
+    # Metrics
     r2 = r2_score(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     rmse = mean_squared_error(y_test, y_pred) ** 0.5
 
+    # Parameters
     mlflow.log_params({
         "test_size": test_size,
         "random_state": random_state,
@@ -51,27 +53,44 @@ with mlflow.start_run(run_name="Random Forest"):
         "max_depth": max_depth
     })
 
+    # Metrics
     mlflow.log_metrics({
         "R2_Score": r2,
         "MAE": mae,
         "RMSE": rmse
     })
 
+    # Figure
     plt.figure(figsize=(8, 5))
     plt.scatter(y_test, y_pred)
+
     plt.xlabel("Actual Salary")
     plt.ylabel("Predicted Salary")
     plt.title("Random Forest - Actual vs Predicted")
-    mlflow.log_figure(plt.gcf(), "random_forest_plot.png")
+
+    mlflow.log_figure(
+        plt.gcf(),
+        "random_forest_plot.png"
+    )
+
     plt.close()
 
+    # Artifact
     results = pd.DataFrame({
         "ActualSalary": y_test.values,
         "PredictedSalary": y_pred
     })
-    results.to_csv("random_forest_predictions.csv", index=False)
-    mlflow.log_artifact("random_forest_predictions.csv")
 
+    results.to_csv(
+        "random_forest_predictions.csv",
+        index=False
+    )
+
+    mlflow.log_artifact(
+        "random_forest_predictions.csv"
+    )
+
+    # Model
     mlflow.sklearn.log_model(
         model,
         name="random_forest_model"
