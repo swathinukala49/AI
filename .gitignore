@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+mlflow/
+mlartifacts/
+mlflow.db
+.env
+rag/temp.pdf
+scaler.pkl
+training_history.csv
+linear_regression_predictions.csv
+deep_learning_predictions.csv
+random_forest_predictions.csv
